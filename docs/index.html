@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seller Net-Proceeds Calculator — Know What Lands in Your Pocket</title>
+<meta name="description" content="Punch in a sale price and see exactly what you walk away with after commissions, taxes, and payoff. No surprises at the closing table.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F3522">
+<link rel="icon" href="icons/icon-32.png">
+<style>
+:root{
+  --green:#1F3522; --ivory:#F5F2E8; --gold:#B49A5B; --oxblood:#5C2A2A; --char:#2C2C2C;
+  --card:#fffdf6; --line:#e4dcc4; --muted:#6f6a58;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+body{margin:0; font-family:Georgia,'Times New Roman',serif; background:var(--ivory); color:var(--char); line-height:1.5}
+header{background:var(--green); color:var(--ivory); padding:28px 20px 22px; text-align:center; border-bottom:4px solid var(--gold)}
+header h1{margin:0; font-size:1.65rem; letter-spacing:.5px; color:var(--gold)}
+header .tag{margin:10px auto 0; max-width:600px; font-style:italic; opacity:.93; font-size:.98rem}
+.steps{display:flex; gap:10px; justify-content:center; margin:16px auto 0; max-width:640px; flex-wrap:wrap}
+.step{flex:1 1 150px; background:rgba(245,242,232,.07); border:1px solid rgba(180,154,91,.5); border-radius:10px; padding:10px 12px; font-size:.85rem; text-align:left}
+.step b{display:block; color:var(--gold); font-size:.95rem; margin-bottom:2px}
+main{max-width:720px; margin:0 auto; padding:18px 14px 90px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; margin:14px 0; box-shadow:0 2px 8px rgba(44,44,44,.06)}
+.card h2{margin:0 0 4px; font-size:1.15rem; color:var(--green)}
+.card .sub{margin:0 0 14px; font-size:.9rem; color:var(--muted)}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.field label{display:block; font-size:.82rem; font-weight:bold; color:var(--green); margin-bottom:4px}
+.field input,.field select{width:100%; font-family:inherit; font-size:1rem; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#fff; color:var(--char)}
+.field input:focus,.field select:focus{outline:2px solid var(--gold); border-color:var(--gold)}
+.field .hint{font-size:.76rem; color:var(--muted); margin-top:3px}
+.field.full{grid-column:1/-1}
+.bigprice input{font-size:1.35rem; font-weight:bold; color:var(--green)}
+#taxCustomRow{display:none}
+.sliderWrap{margin-top:6px}
+input[type=range]{width:100%; accent-color:var(--gold); height:34px}
+.sliderLabel{display:flex; justify-content:space-between; align-items:baseline; font-size:.9rem; margin-bottom:2px}
+.sliderLabel b{color:var(--green); font-size:1.05rem}
+.linkbtn{background:none; border:none; color:var(--oxblood); font-family:inherit; font-size:.85rem; text-decoration:underline; cursor:pointer; padding:0}
+.netHero{text-align:center; padding:8px 0 4px}
+.netHero .lbl{font-size:.85rem; color:var(--muted); text-transform:uppercase; letter-spacing:2px}
+.netHero .num{font-size:2.9rem; font-weight:bold; color:var(--green); line-height:1.15; margin:4px 0}
+.netHero .num.neg{color:var(--oxblood)}
+.stats{display:flex; gap:10px; margin-top:10px}
+.stat{flex:1; background:var(--ivory); border:1px solid var(--line); border-radius:10px; padding:10px; text-align:center}
+.stat .v{font-size:1.15rem; font-weight:bold; color:var(--char)}
+.stat .k{font-size:.75rem; color:var(--muted); margin-top:2px}
+.dline{border-top:1px solid var(--line); padding:10px 2px}
+.dline .row{display:flex; justify-content:space-between; align-items:center; cursor:pointer; gap:10px}
+.dline .nm{font-size:.95rem}
+.dline .amt{font-weight:bold; white-space:nowrap}
+.dline .why{display:none; font-size:.85rem; color:var(--muted); margin-top:6px; padding:8px 10px; background:var(--ivory); border-left:3px solid var(--gold); border-radius:0 8px 8px 0}
+.dline.open .why{display:block}
+.dline .chev{color:var(--gold); font-size:.8rem; margin-left:6px}
+.dline.total .row{cursor:default}
+.dline.total .nm{font-weight:bold; color:var(--green)}
+.btn{display:inline-block; font-family:inherit; font-size:1rem; font-weight:bold; padding:12px 22px; border:none; border-radius:10px; cursor:pointer}
+.btn.go{background:var(--green); color:var(--ivory)}
+.btn.gold{background:var(--gold); color:var(--green)}
+.btn.ghost{background:none; border:1px solid var(--line); color:var(--muted)}
+.btnrow{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.scn{border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:10px 0; background:#fff; position:relative}
+.scn .nm{font-weight:bold; color:var(--green); font-size:1rem; padding-right:30px}
+.scn .nums{display:flex; gap:14px; flex-wrap:wrap; margin-top:6px; font-size:.9rem}
+.scn .nums b{color:var(--char)}
+.scn .best{display:inline-block; font-size:.72rem; background:var(--green); color:var(--ivory); border-radius:20px; padding:2px 10px; margin-left:8px; vertical-align:middle}
+.scn .del{position:absolute; top:8px; right:10px; background:none; border:none; color:var(--oxblood); font-size:1.2rem; cursor:pointer; line-height:1}
+.empty{color:var(--muted); font-style:italic; font-size:.9rem}
+footer{text-align:center; color:var(--muted); font-size:.78rem; padding:24px 16px}
+.note{background:#faf6ea; border:1px dashed var(--gold); border-radius:10px; padding:12px 14px; font-size:.85rem; color:var(--muted); margin:14px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Seller Net-Proceeds Calculator</h1>
+  <p class="tag">Punch in a sale price. See exactly what lands in your pocket after every deduction — no surprises at the closing table.</p>
+  <div class="steps">
+    <div class="step"><b>1 · Enter</b>Type your numbers below. Defaults are pre-filled with typical figures.</div>
+    <div class="step"><b>2 · Read</b>The itemized breakdown updates live. Tap any line to learn what it means.</div>
+    <div class="step"><b>3 · Compare</b>Save up to 5 scenarios — different prices, different concessions — and pick the winner.</div>
+  </div>
+</header>
+<main>
+
+<section class="card">
+  <h2>Your numbers</h2>
+  <p class="sub">Everything updates the moment you type. Leave anything blank and it counts as $0.</p>
+  <div class="grid">
+    <div class="field full bigprice">
+      <label for="price">Sale price ($)</label>
+      <input id="price" type="number" inputmode="decimal" min="0" step="1000" value="500000">
+    </div>
+    <div class="field">
+      <label for="listComm">Listing commission (%)</label>
+      <input id="listComm" type="number" inputmode="decimal" min="0" step="0.1" value="2.5">
+      <div class="hint">Your agent's brokerage cut.</div>
+    </div>
+    <div class="field">
+      <label for="buyerComm">Buyer-side commission (%)</label>
+      <input id="buyerComm" type="number" inputmode="decimal" min="0" step="0.1" value="2.5">
+      <div class="hint">Offered to the buyer's brokerage. Negotiable — 0 is allowed.</div>
+    </div>
+    <div class="field">
+      <label for="taxState">Transfer tax — state</label>
+      <select id="taxState">
+        <option value="NJ">New Jersey — $3.40 per $1,000</option>
+        <option value="PA">Pennsylvania — 2% (state + local)</option>
+        <option value="NY">New York — 0.4% (state)</option>
+        <option value="FL">Florida — $0.70 per $100</option>
+        <option value="CA">California — $1.10 per $1,000</option>
+        <option value="TX">Texas — none</option>
+        <option value="CUSTOM">Custom…</option>
+      </select>
+    </div>
+    <div class="field" id="taxCustomRow">
+      <label for="taxCustom">Custom transfer tax</label>
+      <div style="display:flex; gap:8px">
+        <input id="taxCustom" type="number" inputmode="decimal" min="0" step="0.01" value="0" style="flex:1">
+        <select id="taxCustomMode" style="flex:0 0 110px">
+          <option value="pct">% of price</option>
+          <option value="flat">$ flat</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="payoff">Mortgage payoff ($)</label>
+      <input id="payoff" type="number" inputmode="decimal" min="0" step="100" value="300000">
+      <div class="hint">What you still owe the bank.</div>
+    </div>
+    <div class="field">
+      <label for="attorney">Attorney / title fees ($)</label>
+      <input id="attorney" type="number" inputmode="decimal" min="0" step="50" value="2500">
+      <div class="hint">Closing attorney, title search &amp; insurance.</div>
+    </div>
+    <div class="field">
+      <label for="repairs">Repair credits ($)</label>
+      <input id="repairs" type="number" inputmode="decimal" min="0" step="100" value="0">
+      <div class="hint">Money to the buyer instead of fixing things.</div>
+    </div>
+    <div class="field">
+      <label for="concessions">Seller concessions ($)</label>
+      <input id="concessions" type="number" inputmode="decimal" min="0" step="100" value="0">
+      <div class="hint">Buyer's closing costs you agree to cover.</div>
+    </div>
+    <div class="field full">
+      <label for="other">Other costs ($)</label>
+      <input id="other" type="number" inputmode="decimal" min="0" step="50" value="0">
+      <div class="hint">HOA transfer fees, prorated taxes, miscellaneous.</div>
+    </div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>What-if: drag the price</h2>
+  <p class="sub">Slide ±20% around your sale price and watch your net proceeds move in real time.</p>
+  <div class="sliderLabel"><span id="slideDelta">At your entered price</span><b id="slidePrice"></b></div>
+  <div class="sliderWrap"><input type="range" id="slider" min="-20" max="20" value="0" step="1" aria-label="Adjust sale price by percent"></div>
+  <div class="btnrow" style="margin-top:6px">
+    <button class="linkbtn" id="slideReset">Reset to entered price</button>
+  </div>
+</section>
+
+<section class="card">
+  <h2>The breakdown</h2>
+  <p class="sub">Where every dollar goes. Tap any line for a plain-English explanation.</p>
+  <div class="netHero">
+    <div class="lbl">You walk away with</div>
+    <div class="num" id="netOut">$0</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v" id="netPctOut">—</div><div class="k">of sale price kept</div></div>
+    <div class="stat"><div class="v" id="deductOut">$0</div><div class="k">total deductions</div></div>
+    <div class="stat"><div class="v" id="per100kOut">$0</div><div class="k">cost per $100k sold</div></div>
+  </div>
+  <div id="lines" style="margin-top:12px"></div>
+</section>
+
+<section class="card">
+  <h2>Save &amp; compare</h2>
+  <p class="sub">Keep up to 5 scenarios — different prices, different concessions — and see them side by side.</p>
+  <div class="btnrow">
+    <input id="scnName" type="text" placeholder="Name this scenario (e.g. Lowball offer)" style="flex:1; min-width:180px; font-family:inherit; font-size:1rem; padding:10px 12px; border:1px solid var(--line); border-radius:8px">
+    <button class="btn go" id="saveBtn">Save scenario</button>
+  </div>
+  <div id="scnList" style="margin-top:8px"><p class="empty">No saved scenarios yet. Your current numbers are Scenario Zero — save them before you change anything.</p></div>
+</section>
+
+<div class="note">Planning estimates, not legal or tax advice. Transfer taxes vary by county and municipality — verify your local rate before you sign anything. Commission splits are negotiable.</div>
+
+</main>
+<footer>Seller Net-Proceeds Calculator · part of the daily finance &amp; real-estate tool series · runs entirely in your browser</footer>
+<script>
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var LS_KEY = "snp-scenarios-v1";
+
+function num(id){
+  var v = parseFloat(String($(id).value).replace(/[^0-9.\-]/g, ""));
+  return (isFinite(v) && v > 0) ? v : 0;
+}
+function fmt(n){
+  var neg = n < 0;
+  var s = Math.abs(Math.round(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-$" : "$") + s;
+}
+function pct(n){ return (n * 100).toFixed(1) + "%"; }
+
+var TAX = {
+  NJ: { rate: 0.0034, label: "Transfer tax (NJ — $3.40/$1,000)" },
+  PA: { rate: 0.02,   label: "Transfer tax (PA — 2%)" },
+  NY: { rate: 0.004,  label: "Transfer tax (NY — 0.4%)" },
+  FL: { rate: 0.007,  label: "Transfer tax (FL — $0.70/$100)" },
+  CA: { rate: 0.0011, label: "Transfer tax (CA — $1.10/$1,000)" },
+  TX: { rate: 0,      label: "Transfer tax (TX — none)" }
+};
+
+var WHY = {
+  listComm: "What you pay your listing agent's brokerage for pricing, marketing, showing, and negotiating the sale. Set by your listing agreement — always negotiable.",
+  buyerComm: "What you offer the buyer's agent's brokerage as an incentive to bring their buyer. Since the 2024 rule changes this is optional and negotiable — 0% is allowed.",
+  tax: "State and local tax charged to record the deed transfer. Every state does it differently — some charge a percent, some a few dollars per thousand. The bank collects it at closing.",
+  payoff: "What you still owe your mortgage lender, including any accrued interest to the closing date. The lender is paid first — you only keep what's left after.",
+  attorney: "Your closing attorney, the title search, title insurance, and settlement fees. In attorney states like NJ this is a real line item; budget a few thousand.",
+  repairs: "A credit to the buyer in place of repairs — common after the inspection report lands. It's cheaper than doing the work yourself, but it comes straight out of your net.",
+  concessions: "Closing costs you agree to pay on the buyer's behalf to get the deal done. Typical in a buyer's market or when the buyer is stretching on price.",
+  other: "The catch-all: HOA transfer fees, prorated property taxes, recording fees, and anything else with its hand out at the table."
+};
+
+function compute(){
+  var base = num("price");
+  var slide = parseFloat($("slider").value) || 0;
+  var price = Math.max(0, Math.round(base * (1 + slide / 100)));
+  var lc = price * num("listComm") / 100;
+  var bc = price * num("buyerComm") / 100;
+  var st = $("taxState").value;
+  var tax, taxLabel;
+  if (st === "CUSTOM") {
+    var cv = parseFloat($("taxCustom").value) || 0;
+    if ($("taxCustomMode").value === "flat") { tax = Math.max(0, cv); }
+    else { tax = price * Math.max(0, cv) / 100; }
+    taxLabel = "Transfer tax (custom)";
+  } else {
+    tax = price * TAX[st].rate;
+    taxLabel = TAX[st].label;
+  }
+  var payoff = num("payoff"), attorney = num("attorney"),
+      repairs = num("repairs"), concessions = num("concessions"), other = num("other");
+  var lines = [
+    { k: "listComm", label: "Listing commission (" + (parseFloat($("listComm").value) || 0) + "%)", amt: lc },
+    { k: "buyerComm", label: "Buyer-side commission (" + (parseFloat($("buyerComm").value) || 0) + "%)", amt: bc },
+    { k: "tax", label: taxLabel, amt: tax },
+    { k: "payoff", label: "Mortgage payoff", amt: payoff },
+    { k: "attorney", label: "Attorney / title fees", amt: attorney },
+    { k: "repairs", label: "Repair credits", amt: repairs },
+    { k: "concessions", label: "Seller concessions", amt: concessions },
+    { k: "other", label: "Other costs", amt: other }
+  ];
+  var ded = lines.reduce(function(a, l){ return a + l.amt; }, 0);
+  var net = price - ded;
+  return {
+    price: price, base: base, slide: slide, lines: lines,
+    ded: ded, net: net,
+    netPct: price > 0 ? net / price : 0,
+    per100k: price > 0 ? ded / price * 100000 : 0,
+    inputs: {
+      price: base, listComm: $("listComm").value, buyerComm: $("buyerComm").value,
+      taxState: st, taxCustom: $("taxCustom").value, taxCustomMode: $("taxCustomMode").value,
+      payoff: payoff, attorney: attorney, repairs: repairs,
+      concessions: concessions, other: other
+    }
+  };
+}
+
+function render(){
+  var r = compute();
+  var netEl = $("netOut");
+  netEl.textContent = fmt(r.net);
+  netEl.className = "num" + (r.net < 0 ? " neg" : "");
+  $("netPctOut").textContent = pct(r.netPct);
+  $("deductOut").textContent = fmt(r.ded);
+  $("per100kOut").textContent = fmt(r.per100k);
+  $("slidePrice").textContent = fmt(r.price);
+  $("slideDelta").textContent = r.slide === 0
+    ? "At your entered price"
+    : (r.slide > 0 ? "+" : "") + r.slide + "% → " + fmt(r.price) + " (base " + fmt(r.base) + ")";
+
+  var box = $("lines");
+  box.innerHTML = "";
+  r.lines.forEach(function(l){
+    if (l.amt <= 0) return;
+    var d = document.createElement("div");
+    d.className = "dline";
+    d.innerHTML = '<div class="row"><span class="nm">' + l.label +
+      '<span class="chev">▸ what&rsquo;s this?</span></span>' +
+      '<span class="amt">−' + fmt(l.amt) + "</span></div>" +
+      '<div class="why">' + WHY[l.k] + "</div>";
+    d.querySelector(".row").addEventListener("click", function(){ d.classList.toggle("open"); });
+    box.appendChild(d);
+  });
+  var t = document.createElement("div");
+  t.className = "dline total";
+  t.innerHTML = '<div class="row"><span class="nm">Total deductions</span>' +
+    '<span class="amt">−' + fmt(r.ded) + "</span></div>";
+  box.appendChild(t);
+  if (!box.querySelector(".dline:not(.total)")) {
+    var e = document.createElement("p");
+    e.className = "empty";
+    e.textContent = "No deductions entered — the whole price is yours (congratulations, and check your math).";
+    box.insertBefore(e, t);
+  }
+}
+
+function loadScn(){
+  try {
+    var s = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+    return Array.isArray(s) ? s : [];
+  } catch (e) { return []; }
+}
+function saveScn(a){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(a)); } catch (e) {}
+}
+
+function renderScn(){
+  var list = loadScn();
+  var box = $("scnList");
+  box.innerHTML = "";
+  if (!list.length) {
+    box.innerHTML = '<p class="empty">No saved scenarios yet. Your current numbers are Scenario Zero — save them before you change anything.</p>';
+    return;
+  }
+  var best = -Infinity, bi = -1;
+  list.forEach(function(s, i){ if (s.net > best) { best = s.net; bi = i; } });
+  list.forEach(function(s, i){
+    var d = document.createElement("div");
+    d.className = "scn";
+    d.innerHTML = '<button class="del" title="Delete" aria-label="Delete scenario">×</button>' +
+      '<div class="nm">' + s.name.replace(/</g, "&lt;") +
+      (i === bi ? '<span class="best">best net</span>' : "") + "</div>" +
+      '<div class="nums"><span>Price <b>' + fmt(s.price) + "</b></span>" +
+      "<span>Net <b>" + fmt(s.net) + "</b></span>" +
+      "<span>Deductions <b>" + fmt(s.ded) + "</b></span>" +
+      "<span>Kept <b>" + pct(s.netPct) + "</b></span></div>";
+    d.querySelector(".del").addEventListener("click", function(){
+      var l = loadScn(); l.splice(i, 1); saveScn(l); renderScn();
+    });
+    box.appendChild(d);
+  });
+}
+
+function snapshot(name, r){
+  return { name: name, price: r.price, net: Math.round(r.net), ded: Math.round(r.ded), netPct: r.netPct };
+}
+
+["price","listComm","buyerComm","taxState","taxCustom","taxCustomMode","payoff","attorney","repairs","concessions","other"]
+  .forEach(function(id){
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+$("slider").addEventListener("input", render);
+$("slideReset").addEventListener("click", function(){ $("slider").value = 0; render(); });
+$("taxState").addEventListener("change", function(){
+  $("taxCustomRow").style.display = ($("taxState").value === "CUSTOM") ? "block" : "none";
+  render();
+});
+$("saveBtn").addEventListener("click", function(){
+  var list = loadScn();
+  if (list.length >= 5) { alert("Five scenarios max — delete one to make room."); return; }
+  var name = $("scnName").value.trim() || ("Scenario " + (list.length + 1));
+  list.push(snapshot(name, compute()));
+  saveScn(list); renderScn();
+  $("scnName").value = "";
+});
+
+render();
+renderScn();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
